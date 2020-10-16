@@ -26,6 +26,7 @@ sealed abstract class Response(status: Status, body: String) {
       case l if l > 0 => addHeader("Content-Length", l.toString)
     }
     val buf = new StringBuilder(s"HTTP/1.1 ${status}${cr}")
+    buf.append("Content-Type: text/html; charset=UTF-8\n")
     for ((k, v) <- headers) {
       buf.append(s"${k}: ${v}${cr}")
     }
