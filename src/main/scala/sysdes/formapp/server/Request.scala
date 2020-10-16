@@ -31,7 +31,8 @@ object Request {
       }
     }
     // ボディ情報の取得（"Content-Length"に指定されたバイト数分のみ取得する）
-    for (bodyLength <- request.headers.get("Content-Length").map(_.toInt) if bodyLength > 0) {
+    for (bodyLength <- request.headers.get("Content-Length").map(_.toInt)
+         if bodyLength > 0) {
       val buffer = new Array[Char](bodyLength)
       in.read(buffer) match {
         case i if i != -1 => request.body = Some(String.valueOf(buffer))

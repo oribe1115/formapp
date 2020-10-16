@@ -10,11 +10,15 @@ abstract class Handler(socket: Socket) extends Runnable with Logger {
   private val encode = Charsets.UTF_8
 
   final def run(): Unit = {
-    val in  = new BufferedReader(new InputStreamReader(socket.getInputStream, encode))
+    val in = new BufferedReader(
+      new InputStreamReader(socket.getInputStream, encode)
+    )
     val out = new OutputStreamWriter(socket.getOutputStream, encode)
     try {
       Request.parse(in) match {
-        case Some(Request(_, "/favicon.ico", _, _, _)) | Some(Request(_, "/robot.txt", _, _, _)) => { /* ignore */ }
+        case Some(Request(_, "/favicon.ico", _, _, _)) | Some(
+              Request(_, "/robot.txt", _, _, _)
+            ) => { /* ignore */ }
         case Some(request) => {
           requestLog(request)
           val response = this.handle(request)
