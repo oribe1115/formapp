@@ -9,7 +9,7 @@ object StatelessServer extends Server(8001) {
 
 class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
-  import sysdes.formapp.server.{NotFound, Ok, Request, Response}
+  import sysdes.formapp.server.{InputData, NotFound, Ok, Request, Response, ResponseBody}
 
   override def handle(request: Request): Response =
     request match {
@@ -21,13 +21,15 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     }
 
   def index(): Response = {
-    Ok("""<html>
-        |<body>
-        |    <form action="/form" method="post">
-        |        <input type="submit" value="start" />
-        |    </form>
-        |</body>
-        |</html>""".stripMargin)
+    val inputData: Array[InputData] = new Array[InputData](1)
+    inputData(0) = new InputData("submit", "", "start")
+    val resBody = new ResponseBody(
+      "/form",
+      "get",
+      "アンケート開始<br>",
+      inputData
+    )
+    Ok(resBody.toString())
   }
 
 }
