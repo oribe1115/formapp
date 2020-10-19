@@ -41,3 +41,21 @@ object Request {
     request
   })
 }
+
+class RequestBody(body: Option[String]) {
+  def parseParams(): HashMap[String, String] = {
+    body match {
+      case Some(b) => {
+        val pairs                           = b.split("&")
+        val params: HashMap[String, String] = HashMap()
+        for (pair <- pairs) {
+          val p = pair.split("=")
+          params.put(p(0), p(1))
+        }
+
+        params
+      }
+      case None => HashMap.empty
+    }
+  }
+}

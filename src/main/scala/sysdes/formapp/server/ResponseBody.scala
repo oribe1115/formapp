@@ -32,15 +32,11 @@ trait Element extends ElementBase {
   def formatOutput = s"|        ${toHTMLElemt()}\n"
 }
 
-class TextElement(text: String, afterBreak: Boolean)
-    extends ElementBase
-    with Element {
+class TextElement(text: String, afterBreak: Boolean) extends ElementBase with Element {
   def toHTMLElemt(): String = if (afterBreak) text + "<br>" else text
 }
 
-class InputElement(inputType: String, name: String, value: String)
-    extends ElementBase
-    with Element {
+class InputElement(inputType: String, name: String, value: String) extends ElementBase with Element {
   def toHTMLElemt(): String = {
     inputType match {
       case "submit" => s"""<input type="submit" value="${value}" />"""
@@ -50,9 +46,7 @@ class InputElement(inputType: String, name: String, value: String)
   }
 }
 
-class TextAreaElement(name: String, value: String)
-    extends ElementBase
-    with Element {
+class TextAreaElement(name: String, value: String) extends ElementBase with Element {
   def toHTMLElemt(): String =
     s"""<textarea name="${name}">${value}</textarea>"""
 }
