@@ -46,7 +46,12 @@ class InputElement(inputType: String, name: String, value: String) extends Eleme
   }
 }
 
-class TextAreaElement(name: String, value: String) extends ElementBase with Element {
-  def toHTMLElemt(): String =
-    s"""<textarea name="${name}">${value}</textarea>"""
+class TextAreaElement(name: String, value: String, disabled: Boolean) extends ElementBase with Element {
+  def toHTMLElemt(): String = {
+    if (disabled) {
+      s"""<textarea name="${name}" disabled>${value}</textarea>"""
+    } else {
+      s"""<textarea name="${name}">${value}</textarea>"""
+    }
+  }
 }
