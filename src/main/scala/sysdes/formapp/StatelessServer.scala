@@ -14,7 +14,9 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
   override def handle(request: Request): Response =
     request match {
-      case Request("GET", "/", _, _, _) => index()
+      case Request("GET", "/", _, _, _)             => index()
+      case Request("POST", "/form/name", _, _, _)   => nameForm()
+      case Request("POST", "/form/gender", _, _, _) => genderForm()
       case _ =>
         NotFound(
           s"Requested resource '${request.path}' for ${request.method} is not found."
@@ -23,11 +25,38 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
   def index(): Response = {
     val inputData: ArrayBuffer[InputData] = new ArrayBuffer[InputData]
-    inputData.+=(InputData("submit", "", "start"))
+    inputData += (InputData("submit", "", "start"))
     val resBody = new ResponseBody(
-      "/form",
-      "get",
+      "/form/name",
+      "post",
       "アンケート開始<br>",
+      inputData.toArray
+    )
+    Ok(resBody.toString())
+  }
+
+  def nameForm(): Response = {
+    val inputData: ArrayBuffer[InputData] = new ArrayBuffer[InputData]
+    inputData += (InputData("text", "name", ""))
+    inputData += (InputData("submit", "", "送信"))
+    val resBody = new ResponseBody(
+      "/form/gender",
+      "post",
+      "名前:",
+      inputData.toArray
+    )
+    Ok(resBody.toString())
+  }
+
+  def genderForm(): Response = {
+    val inputData: ArrayBuffer[InputData] = new ArrayBuffer[InputData]
+    inputData += (InputData("radio", "gender", "male"))
+    inputData += (InputData("radio", "gender", "female"))
+    inputData += (InputData("submit", "", "送信"))
+    val resBody = new ResponseBody(
+      "/form/message",
+      "post",
+      "性別:",
       inputData.toArray
     )
     Ok(resBody.toString())
