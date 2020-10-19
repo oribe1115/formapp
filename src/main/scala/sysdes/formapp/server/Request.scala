@@ -50,7 +50,9 @@ class RequestBody(body: Option[String]) {
         val params: HashMap[String, String] = HashMap()
         for (pair <- pairs) {
           val p = pair.split("=")
-          params.put(p(0), p(1))
+          if (p.length > 1) {
+            params.put(p(0), p(1))
+          }
         }
 
         params
