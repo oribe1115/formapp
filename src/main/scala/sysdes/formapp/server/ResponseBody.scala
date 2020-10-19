@@ -42,6 +42,16 @@ class InputElement(inputType: String, name: String, value: String) extends Eleme
   }
 }
 
+class RadioElement(name: String, value: String, checked: Boolean) extends ElementBase with Element {
+  def toHTMLElemt(): String = {
+    checked match {
+      case true =>
+        s"""<input type="radio" name="${name}" value="${value}" checked="checked" />"""
+      case _ => s"""<input type="radio" name="${name}" value="${value}" />"""
+    }
+  }
+}
+
 class TextAreaElement(name: String, value: String, disabled: Boolean) extends ElementBase with Element {
   def toHTMLElemt(): String = {
     if (disabled) {

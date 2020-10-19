@@ -17,6 +17,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     InputElement,
     NotFound,
     Ok,
+    RadioElement,
     Request,
     RequestBody,
     Response,
@@ -74,14 +75,17 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
   def genderForm(body: Option[String]): Response = {
     val reqBody: RequestBody = new RequestBody(body)
+    val params               = reqBody.parseParams()
 
     val elements: ArrayBuffer[Element]     = new ArrayBuffer[Element]()
     val backElements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
 
+    val initialWithFemale = (params.getOrElse("gender", "") == "female")
+
     elements.append(new TextElement("性別:", false))
-    elements.append(new InputElement("radio", "gender", "male"))
+    elements.append(new RadioElement("gender", "male", !initialWithFemale))
     elements.append(new TextElement("男性", false))
-    elements.append(new InputElement("radio", "gender", "female"))
+    elements.append(new RadioElement("gender", "female", initialWithFemale))
     elements.append(new TextElement("女性", false))
     elements.append(new TextElement("", true))
     elements.append(new InputElement("submit", "", "next"))
@@ -111,7 +115,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
     elements.append(new TextElement("メッセージ:", true))
     elements.append(
-      new TextAreaElement("message", params.getOrElse("gender", ""), false)
+      new TextAreaElement("message", params.getOrElse("message", ""), false)
     )
     elements.append(new TextElement("", true))
     elements.append(new InputElement("submit", "", "next"))
