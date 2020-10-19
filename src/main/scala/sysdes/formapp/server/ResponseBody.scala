@@ -13,15 +13,14 @@ class ResponseBody(
       elementsForOutput.append(e.formatOutput)
     }
 
-    val body = s"""<html>
-                 |<body>
-                 |    <form action="${formAction}" method="${formMethod}">
-                          ${elementsForOutput.toString()}
-                 |    </form>
-                 |</body>
-                 |</html>""".stripMargin
+    s"""<html>
+      |<body>
+      |    <form action="${formAction}" method="${formMethod}">
+              ${elementsForOutput.toString()}
+      |    </form>
+      |</body>
+      |</html>""".stripMargin
 
-    body
   }
 }
 
@@ -33,11 +32,15 @@ trait Element extends ElementBase {
   def formatOutput = s"|        ${toHTMLElemt()}\n"
 }
 
-class TextElement(text: String, afterBreak: Boolean) extends ElementBase with Element {
+class TextElement(text: String, afterBreak: Boolean)
+    extends ElementBase
+    with Element {
   def toHTMLElemt(): String = if (afterBreak) text + "<br>" else text
 }
 
-class InputElement(inputType: String, name: String, value: String) extends ElementBase with Element {
+class InputElement(inputType: String, name: String, value: String)
+    extends ElementBase
+    with Element {
   def toHTMLElemt(): String = {
     inputType match {
       case "submit" => s"""<input type="submit" value="${value}" />"""
@@ -45,4 +48,11 @@ class InputElement(inputType: String, name: String, value: String) extends Eleme
         s"""<input type="${inputType}" name="${name}" value="${value}" />"""
     }
   }
+}
+
+class TextAreaElement(name: String, value: String)
+    extends ElementBase
+    with Element {
+  def toHTMLElemt(): String =
+    s"""<textarea name="${name}">${value}</textarea>"""
 }

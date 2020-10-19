@@ -10,13 +10,24 @@ object StatelessServer extends Server(8001) {
 
 class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
-  import sysdes.formapp.server.{Element, InputElement, NotFound, Ok, Request, Response, ResponseBody, TextElement}
+  import sysdes.formapp.server.{
+    Element,
+    InputElement,
+    NotFound,
+    Ok,
+    Request,
+    Response,
+    ResponseBody,
+    TextAreaElement,
+    TextElement
+  }
 
   override def handle(request: Request): Response =
     request match {
-      case Request("GET", "/", _, _, _)             => index()
-      case Request("POST", "/form/name", _, _, _)   => nameForm()
-      case Request("POST", "/form/gender", _, _, _) => genderForm()
+      case Request("GET", "/", _, _, _)              => index()
+      case Request("POST", "/form/name", _, _, _)    => nameForm()
+      case Request("POST", "/form/gender", _, _, _)  => genderForm()
+      case Request("POST", "/form/message", _, _, _) => messageForm()
       case _ =>
         NotFound(
           s"Requested resource '${request.path}' for ${request.method} is not found."
@@ -69,4 +80,18 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     Ok(resBody.toString())
   }
 
+  def messageForm(): Response = {
+    val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
+    elements.append(new TextElement("メッセージ:", true))
+    elements.append(new TextAreaElement("message", ""))
+    elements.append(new TextElement("", true))
+    elements.append(new InputElement("submit", "", "next"))
+
+    val resBody = new ResponseBody(
+      "/form/confirm",
+      "post",
+      elements.toArray
+    )
+    Ok(resBody.toString())
+  }
 }
