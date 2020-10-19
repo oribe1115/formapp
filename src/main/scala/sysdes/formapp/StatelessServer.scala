@@ -32,6 +32,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
       case Request("POST", "/form/gender", _, _, body)  => genderForm(body)
       case Request("POST", "/form/message", _, _, body) => messageForm(body)
       case Request("POST", "/form/confirm", _, _, body) => confirm(body)
+      case Request("POST", "/form/finish", _, _, _)     => finish()
       case _ =>
         NotFound(
           s"Requested resource '${request.path}' for ${request.method} is not found."
@@ -144,4 +145,10 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     Ok(resBody.toString())
   }
 
+  def finish(): Response = {
+    val resBody = new ResponseBody(
+      Array[Element](new TextElement("送信しました", false))
+    )
+    Ok(resBody.toString())
+  }
 }
