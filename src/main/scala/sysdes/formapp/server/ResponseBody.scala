@@ -5,30 +5,18 @@ import scala.collection.mutable
 class ResponseBody(
     formAction: String,
     formMethod: String,
-    text: String,
-    input: Array[InputData]
+    elements: Array[Element]
 ) {
   override def toString() = {
-    val inputTags: StringBuilder = new StringBuilder()
-    for (data <- input) {
-      data.inputType match {
-        case "submit" => {
-          inputTags.append(s"""<input type="submit" value="${data.value}" />""")
-        }
-        case _ => {
-          inputTags.append(
-            s"""<input type="${data.inputType}" name="${data.name}" value="${data.value}" />"""
-          )
-        }
-      }
-
+    val elementsForOutput: StringBuilder = new StringBuilder()
+    for (e <- elements) {
+      elementsForOutput.append(e.formatOutput)
     }
 
     val body = s"""<html>
                  |<body>
                  |    <form action="${formAction}" method="${formMethod}">
-                 |        ${text}
-                 |        ${inputTags.toString()}
+                          ${elementsForOutput.toString()}
                  |    </form>
                  |</body>
                  |</html>""".stripMargin
@@ -37,8 +25,24 @@ class ResponseBody(
   }
 }
 
-case class InputData(
-    inputType: String,
-    name: String,
-    value: String
-)
+abstract class ElementBase {
+  def toHTMLElemt(): String
+}
+
+trait Element extends ElementBase {
+  def formatOutput = s"|        ${toHTMLElemt()}\n"
+}
+
+class TextElement(text: String, afterBreak: Boolean) extends ElementBase with Element {
+  def toHTMLElemt(): String = if (afterBreak) text + "<br>" else text
+}
+
+class InputElement(inputType: String, name: String, value: String) extends ElementBase with Element {
+  def toHTMLElemt(): String = {
+    inputType match {
+      case "submit" => s"""<input type="submit" value="${value}" />"""
+      case _ =>
+        s"""<input type="${inputType}" name="${name}" value="${value}" />"""
+    }
+  }
+}
