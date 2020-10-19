@@ -72,7 +72,7 @@ class FormElement(action: String, method: String, elements: Array[Element]) exte
     for (element <- elements) {
       buffer.append(element.formatOutput)
     }
-    buffer.append(s"|    ${bottom}")
+    buffer.append(s"|    ${bottom}\n")
     buffer.toString()
   }
 }
