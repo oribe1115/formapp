@@ -3,8 +3,6 @@ package sysdes.formapp.server
 import scala.collection.mutable
 
 class ResponseBody(
-    formAction: String,
-    formMethod: String,
     elements: Array[Element]
 ) {
   override def toString() = {
@@ -15,9 +13,7 @@ class ResponseBody(
 
     s"""<html>
       |<body>
-      |    <form action="${formAction}" method="${formMethod}">
-              ${elementsForOutput.toString()}
-      |    </form>
+          ${elementsForOutput.toString()}
       |</body>
       |</html>""".stripMargin
 
@@ -53,5 +49,30 @@ class TextAreaElement(name: String, value: String, disabled: Boolean) extends El
     } else {
       s"""<textarea name="${name}">${value}</textarea>"""
     }
+  }
+}
+
+class FormElement(action: String, method: String, elements: Array[Element]) extends ElementBase with Element {
+  val top    = s"""<form action="${action}" method="${method}">"""
+  val bottom = "</form>"
+
+  def toHTMLElemt(): String = {
+    val buffer: StringBuilder = new StringBuilder()
+    buffer.append(top)
+    for (element <- elements) {
+      buffer.append(element.toHTMLElemt())
+    }
+    buffer.append(bottom)
+    buffer.toString()
+  }
+
+  override def formatOutput: String = {
+    val buffer: StringBuilder = new StringBuilder()
+    buffer.append(s"|    ${top}\n")
+    for (element <- elements) {
+      buffer.append(element.formatOutput)
+    }
+    buffer.append(s"|    ${bottom}")
+    buffer.toString()
   }
 }

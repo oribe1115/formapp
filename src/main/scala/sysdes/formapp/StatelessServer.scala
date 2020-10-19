@@ -13,6 +13,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
   import sysdes.formapp.server.{
     Element,
+    FormElement,
     InputElement,
     NotFound,
     Ok,
@@ -43,9 +44,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     elements.append(new InputElement("submit", "", "start"))
 
     val resBody = new ResponseBody(
-      "/form/name",
-      "post",
-      elements.toArray
+      Array[Element](new FormElement("/form/name", "post", elements.toArray))
     )
     Ok(resBody.toString())
   }
@@ -64,9 +63,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     }
 
     val resBody = new ResponseBody(
-      "/form/gender",
-      "post",
-      elements.toArray
+      Array[Element](new FormElement("/form/gender", "post", elements.toArray))
     )
     Ok(resBody.toString())
   }
@@ -88,9 +85,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     }
 
     val resBody = new ResponseBody(
-      "/form/message",
-      "post",
-      elements.toArray
+      Array[Element](new FormElement("/form/message", "post", elements.toArray))
     )
     Ok(resBody.toString())
   }
@@ -109,16 +104,14 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     }
 
     val resBody = new ResponseBody(
-      "/form/confirm",
-      "post",
-      elements.toArray
+      Array[Element](new FormElement("/form/confirm", "post", elements.toArray))
     )
     Ok(resBody.toString())
   }
 
   def confirm(body: Option[String]): Response = {
     val reqBody: RequestBody = new RequestBody(body)
-    val params = reqBody.parseParams()
+    val params               = reqBody.parseParams()
 
     val name = params.get("name") match {
       case Some(value) => value
@@ -146,9 +139,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     }
 
     val resBody = new ResponseBody(
-      "/form/finish",
-      "post",
-      elements.toArray
+      Array[Element](new FormElement("/form/finish", "post", elements.toArray))
     )
     Ok(resBody.toString())
   }
