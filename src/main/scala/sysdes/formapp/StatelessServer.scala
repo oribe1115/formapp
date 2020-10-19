@@ -16,6 +16,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     NotFound,
     Ok,
     Request,
+    RequestBody,
     Response,
     ResponseBody,
     TextAreaElement,
@@ -24,10 +25,10 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
   override def handle(request: Request): Response =
     request match {
-      case Request("GET", "/", _, _, _)              => index()
-      case Request("POST", "/form/name", _, _, _)    => nameForm()
-      case Request("POST", "/form/gender", _, _, _)  => genderForm()
-      case Request("POST", "/form/message", _, _, _) => messageForm()
+      case Request("GET", "/", _, _, _)                 => index()
+      case Request("POST", "/form/name", _, _, body)    => nameForm(body)
+      case Request("POST", "/form/gender", _, _, body)  => genderForm(body)
+      case Request("POST", "/form/message", _, _, body) => messageForm(body)
       case _ =>
         NotFound(
           s"Requested resource '${request.path}' for ${request.method} is not found."
@@ -47,12 +48,18 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     Ok(resBody.toString())
   }
 
-  def nameForm(): Response = {
+  def nameForm(body: Option[String]): Response = {
+    val reqBody: RequestBody = new RequestBody(body)
+
     val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
     elements.append(new TextElement("名前:", false))
     elements.append(new InputElement("text", "name", ""))
     elements.append(new TextElement("", true))
     elements.append(new InputElement("submit", "", "next"))
+
+    for ((key, value) <- reqBody.parseParams()) {
+      elements.append(new InputElement("hidden", key, value))
+    }
 
     val resBody = new ResponseBody(
       "/form/gender",
@@ -62,7 +69,9 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     Ok(resBody.toString())
   }
 
-  def genderForm(): Response = {
+  def genderForm(body: Option[String]): Response = {
+    val reqBody: RequestBody = new RequestBody(body)
+
     val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
     elements.append(new TextElement("性別:", false))
     elements.append(new InputElement("radio", "gender", "male"))
@@ -72,6 +81,10 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     elements.append(new TextElement("", true))
     elements.append(new InputElement("submit", "", "next"))
 
+    for ((key, value) <- reqBody.parseParams()) {
+      elements.append(new InputElement("hidden", key, value))
+    }
+
     val resBody = new ResponseBody(
       "/form/message",
       "post",
@@ -80,12 +93,18 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     Ok(resBody.toString())
   }
 
-  def messageForm(): Response = {
+  def messageForm(body: Option[String]): Response = {
+    val reqBody: RequestBody = new RequestBody(body)
+
     val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
     elements.append(new TextElement("メッセージ:", true))
     elements.append(new TextAreaElement("message", ""))
     elements.append(new TextElement("", true))
     elements.append(new InputElement("submit", "", "next"))
+
+    for ((key, value) <- reqBody.parseParams()) {
+      elements.append(new InputElement("hidden", key, value))
+    }
 
     val resBody = new ResponseBody(
       "/form/confirm",
