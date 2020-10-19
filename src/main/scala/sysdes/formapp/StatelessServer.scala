@@ -2,6 +2,7 @@ package sysdes.formapp
 
 import java.net.Socket
 import sysdes.formapp.server.{Handler, Server}
+import scala.collection.mutable.ArrayBuffer
 
 object StatelessServer extends Server(8001) {
   override def getHandler(socket: Socket) = new StatelessServerHandler(socket)
@@ -21,13 +22,13 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     }
 
   def index(): Response = {
-    val inputData: Array[InputData] = new Array[InputData](1)
-    inputData(0) = new InputData("submit", "", "start")
+    val inputData: ArrayBuffer[InputData] = new ArrayBuffer[InputData]
+    inputData.+=(InputData("submit", "", "start"))
     val resBody = new ResponseBody(
       "/form",
       "get",
       "アンケート開始<br>",
-      inputData
+      inputData.toArray
     )
     Ok(resBody.toString())
   }
