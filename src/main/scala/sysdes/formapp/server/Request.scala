@@ -1,6 +1,7 @@
 package sysdes.formapp.server
 
 import scala.collection.mutable.HashMap
+import java.net.URLDecoder
 
 case class Request(
     method: String,
@@ -51,7 +52,9 @@ class RequestBody(body: Option[String]) {
         for (pair <- pairs) {
           val p = pair.split("=")
           if (p.length > 1) {
-            params.put(p(0), p(1))
+            val key   = URLDecoder.decode(p(0))
+            val value = URLDecoder.decode(p(1))
+            params.put(key, value)
           }
         }
 
