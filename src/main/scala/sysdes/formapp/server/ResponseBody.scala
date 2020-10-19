@@ -1,5 +1,7 @@
 package sysdes.formapp.server
 
+import scala.collection.mutable
+
 class ResponseBody(
     formAction: String,
     formMethod: String,
@@ -7,37 +9,31 @@ class ResponseBody(
     input: Array[InputData]
 ) {
   override def toString() = {
-    // """<html>
-    //   |<body>
-    //   |    <form action="/action" method="get">
-    //   |        アンケート開始
-    //   |        <input type="submit" value="start" />
-    //   |    </form>
-    //   |</body>
-    //   |</html>""".stripMargin
-
-    val base: StringBuilder = new StringBuilder()
-    base.append("<html><body>")
-    base.append(
-      "<form action=\"" + formAction + "\"  method=\"" + formMethod + "\">"
-    )
-    base.append(text)
+    val inputTags: StringBuilder = new StringBuilder()
     for (data <- input) {
       data.inputType match {
         case "submit" => {
-          base.append("<input type=\"submit\" value=\"" + data.value + "\" />")
+          inputTags.append(s"""<input type="submit" value="${data.value}" />""")
         }
         case _ => {
-          base.append(
-            "<input type=\"" + data.inputType + "\" name=\"" + data.name + "\" value=\"" + data.value + "\" />"
+          inputTags.append(
+            s"""<input type="${data.inputType}" name="${data.name}" value="${data.value}" />"""
           )
         }
       }
-    }
-    base.append("</form>")
-    base.append("</body></html>")
 
-    base.toString()
+    }
+
+    val body = s"""<html>
+                 |<body>
+                 |    <form action="${formAction}" method="${formMethod}">
+                 |        ${text}
+                 |        ${inputTags.toString()}
+                 |    </form>
+                 |</body>
+                 |</html>""".stripMargin
+
+    body
   }
 }
 
