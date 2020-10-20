@@ -64,3 +64,33 @@ class RequestBody(body: Option[String]) {
     }
   }
 }
+
+class RequestHeader(header: HashMap[String, String]) {
+  def getFromCookie(key: String): Option[String] = {
+    val cookie                            = header.get("Cookie")
+    val pairsMap: HashMap[String, String] = HashMap()
+
+    cookie match {
+      case Some(c) => {
+        val pairs = c.split(" ;")
+        for (pair <- pairs) {
+          val p = pair.split("=")
+          p.length match {
+            case 2 => {
+              val key   = URLDecoder.decode(p(0))
+              val value = URLDecoder.decode(p(1))
+              pairsMap.put(key, value)
+            }
+          }
+        }
+      }
+      case None => None
+    }
+
+    val target = pairsMap.get(key)
+    target match {
+      case Some(t) => Some(t)
+      case None    => None
+    }
+  }
+}

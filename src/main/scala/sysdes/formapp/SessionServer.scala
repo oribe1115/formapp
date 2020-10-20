@@ -2,17 +2,46 @@ package sysdes.formapp
 
 import java.net.Socket
 import sysdes.formapp.server.{Handler, Server}
+import scala.collection.mutable.HashMap
+import java.util.UUID
+import scala.collection.mutable.ArrayBuffer
 
 object SessionServer extends Server(8002) {
   override def getHandler(socket: Socket) = new SessionServerHandler(socket)
 }
 
 object SessionServerHandler {
-  // インスタンス間で共有する内部状態に関する変数・関数はこの中に記述
+  private val userData: HashMap[UUID, FormData] = HashMap()
+
+  def newUser(): UUID = {
+    val sessionID          = UUID.randomUUID()
+    val formData: FormData = FormData("", "", "")
+    userData.put(sessionID, formData)
+    sessionID
+  }
+
+  def updateFormData(sessionID: UUID, formData: FormData): Unit = {
+    userData.update(sessionID, formData)
+  }
+
+  def getFormData(sessionID: UUID): Option[FormData] = {
+    userData.get(sessionID)
+  }
 }
 
 class SessionServerHandler(socket: Socket) extends Handler(socket) {
-  import sysdes.formapp.server.{NotFound, Ok, Request, Response}
+  import sysdes.formapp.server.{
+    Element,
+    FormElement,
+    InputElement,
+    NotFound,
+    Ok,
+    Request,
+    Response,
+    ResponseBody,
+    TextAreaElement,
+    TextElement
+  }
 
   def handle(request: Request): Response =
     request match {
@@ -24,13 +53,24 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
     }
 
   def index(): Response = {
-    Ok("""<html>
-         |<body>
-         |    <form action="/register-name" method="post">
-         |        <input type="submit" value="start" />
-         |    </form>
-         |</body>
-         |</html>""".stripMargin)
+    val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
+    elements.append(new TextElement("アンケート開始", true))
+    elements.append(new InputElement("submit", "", "start"))
+    val resBody = new ResponseBody(
+      Array[Element](new FormElement("/form/name", "post", elements.toArray))
+    )
+
+    val res: Response = Ok(resBody.toString())
+    val sessionID     = SessionServerHandler.newUser()
+    res.addCookie("sessionID", sessionID.toString())
+
+    res
   }
 
 }
+
+case class FormData(
+    var name: String,
+    var gender: String,
+    var message: String
+)

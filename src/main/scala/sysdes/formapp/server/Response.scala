@@ -34,6 +34,9 @@ sealed abstract class Response(status: Status, body: String) {
     buf.toString()
   }
 
+  def addCookie(key: String, value: String) =
+    addHeader("Set-Cookie", s"${key}=${value}")
+
 }
 
 final case class Ok(body: String = "")         extends Response(Status.OK, body)
