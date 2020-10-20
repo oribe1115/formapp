@@ -37,6 +37,7 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
     InputElement,
     NotFound,
     Ok,
+    RadioElement,
     Request,
     RequestBody,
     RequestHeader,
@@ -50,6 +51,8 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
     request match {
       case Request("GET", "/", _, _, _)                => index()
       case Request("POST", "/form/name", _, header, _) => nameForm(header)
+      case Request("POST", "/form/gender", _, header, body) =>
+        genderForm(header, body)
       case _ =>
         NotFound(
           s"Requested resource '${request.path}' for ${request.method} is not found."
@@ -99,6 +102,50 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
       Array[Element](new FormElement("/form/gender", "post", elements.toArray))
     )
 
+    Ok(resBody.toString())
+  }
+
+  def genderForm(
+      header: HashMap[String, String],
+      body: Option[String]
+  ): Response = {
+    val reqHeader            = new RequestHeader(header)
+    val reqBody: RequestBody = new RequestBody(body)
+    val params               = reqBody.parseParams()
+
+    var sessionID = ""
+    var formData  = FormData("", "", "")
+
+    getSessionIDAndFormData(reqHeader) match {
+      case (Some(_sessionID), Some(_formData)) => {
+        sessionID = _sessionID
+        formData = _formData
+      }
+      case (_, _) => return sessionIDNotFound()
+    }
+
+    val name = params.getOrElse("name", "")
+    if (name.length() != 0) {
+      formData.name = name
+      SessionServerHandler.updateFormData(sessionID, formData)
+    }
+
+    val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
+    val initialWithFemale              = (formData.gender == "female")
+
+    elements.append(new TextElement("性別:", false))
+    elements.append(new RadioElement("gender", "male", !initialWithFemale))
+    elements.append(new TextElement("男性", false))
+    elements.append(new RadioElement("gender", "female", initialWithFemale))
+    elements.append(new TextElement("女性", false))
+    elements.append(new TextElement("", true))
+    elements.append(new InputElement("submit", "", "next"))
+
+    val resBody = new ResponseBody(
+      Array[Element](
+        new FormElement("/form/message", "post", elements.toArray)
+      )
+    )
     Ok(resBody.toString())
   }
 
