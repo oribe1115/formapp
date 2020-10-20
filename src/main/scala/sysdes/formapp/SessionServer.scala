@@ -30,23 +30,7 @@ object SessionServerHandler {
 }
 
 class SessionServerHandler(socket: Socket) extends Handler(socket) {
-  import sysdes.formapp.server.{
-    BadRequest,
-    Element,
-    FormElement,
-    HrefElement,
-    InputElement,
-    NotFound,
-    Ok,
-    RadioElement,
-    Request,
-    RequestBody,
-    RequestHeader,
-    Response,
-    ResponseBody,
-    TextAreaElement,
-    TextElement
-  }
+  import sysdes.formapp.server._
 
   def handle(request: Request): Response =
     request match {

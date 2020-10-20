@@ -11,21 +11,7 @@ object StatelessServer extends Server(8001) {
 
 class StatelessServerHandler(socket: Socket) extends Handler(socket) {
 
-  import sysdes.formapp.server.{
-    Element,
-    FormElement,
-    HrefElement,
-    InputElement,
-    NotFound,
-    Ok,
-    RadioElement,
-    Request,
-    RequestBody,
-    Response,
-    ResponseBody,
-    TextAreaElement,
-    TextElement
-  }
+  import sysdes.formapp.server._
 
   override def handle(request: Request): Response =
     request match {
