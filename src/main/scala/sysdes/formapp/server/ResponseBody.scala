@@ -86,3 +86,7 @@ class FormElement(action: String, method: String, elements: Array[Element]) exte
     buffer.toString()
   }
 }
+
+class HrefElement(link: String, value: String) extends ElementBase with Element {
+  def toHTMLElemt(): String = s"""<a href="${link}">${value}</a>"""
+}

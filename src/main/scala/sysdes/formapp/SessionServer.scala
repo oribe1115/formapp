@@ -34,6 +34,7 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
     BadRequest,
     Element,
     FormElement,
+    HrefElement,
     InputElement,
     NotFound,
     Ok,
@@ -153,9 +154,10 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
     val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
     elements.append(new TextElement("セッションIDが確認できませんでした", true))
     elements.append(new TextElement("初めから回答しなおしてください", true))
-    elements.append(new InputElement("submit", "", "back to start"))
+    elements.append(new HrefElement("/", "back to top"))
+
     val resBody = new ResponseBody(
-      Array[Element](new FormElement("/", "get", elements.toArray))
+      elements.toArray
     )
 
     BadRequest(resBody.toString())

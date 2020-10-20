@@ -14,6 +14,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
   import sysdes.formapp.server.{
     Element,
     FormElement,
+    HrefElement,
     InputElement,
     NotFound,
     Ok,
@@ -171,14 +172,11 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
   }
 
   def finish(): Response = {
-    val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
-    elements.append(new TextElement("送信しました", false))
-    elements.append(new TextElement("", true))
-    elements.append(new InputElement("submit", "", "back to top"))
     val resBody = new ResponseBody(
       Array[Element](
-        new FormElement("/", "get", elements.toArray)
-      ) // indexにうまく飛べない
+        new TextElement("送信しました", true),
+        new HrefElement("/", "back to top")
+      )
     )
     Ok(resBody.toString())
   }
