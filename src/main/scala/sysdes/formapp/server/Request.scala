@@ -72,7 +72,7 @@ class RequestHeader(header: HashMap[String, String]) {
 
     cookie match {
       case Some(c) => {
-        val pairs = c.split(" ;")
+        val pairs = c.split("; ")
         for (pair <- pairs) {
           val p = pair.split("=")
           p.length match {

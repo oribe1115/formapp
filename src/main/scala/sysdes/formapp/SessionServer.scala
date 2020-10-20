@@ -84,7 +84,7 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
         sessionID = _sessionID
         formData = _formData
       }
-      case (_, _) => sessionIDNotFound()
+      case (_, _) => return sessionIDNotFound()
     }
 
     val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
