@@ -13,30 +13,33 @@ object SessionServer extends Server(8002) {
 object SessionServerHandler {
   private val userData: HashMap[UUID, FormData] = HashMap()
 
-  def newUser(): UUID = {
+  def newUser(): String = {
     val sessionID          = UUID.randomUUID()
     val formData: FormData = FormData("", "", "")
     userData.put(sessionID, formData)
-    sessionID
+    sessionID.toString()
   }
 
-  def updateFormData(sessionID: UUID, formData: FormData): Unit = {
-    userData.update(sessionID, formData)
+  def updateFormData(sessionID: String, formData: FormData): Unit = {
+    userData.update(UUID.fromString(sessionID), formData)
   }
 
-  def getFormData(sessionID: UUID): Option[FormData] = {
-    userData.get(sessionID)
+  def getFormData(sessionID: String): Option[FormData] = {
+    userData.get(UUID.fromString(sessionID))
   }
 }
 
 class SessionServerHandler(socket: Socket) extends Handler(socket) {
   import sysdes.formapp.server.{
+    BadRequest,
     Element,
     FormElement,
     InputElement,
     NotFound,
     Ok,
     Request,
+    RequestBody,
+    RequestHeader,
     Response,
     ResponseBody,
     TextAreaElement,
@@ -45,7 +48,8 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
 
   def handle(request: Request): Response =
     request match {
-      case Request("GET", "/", _, _, _) => index()
+      case Request("GET", "/", _, _, _)                => index()
+      case Request("POST", "/form/name", _, header, _) => nameForm(header)
       case _ =>
         NotFound(
           s"Requested resource '${request.path}' for ${request.method} is not found."
@@ -62,11 +66,69 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
 
     val res: Response = Ok(resBody.toString())
     val sessionID     = SessionServerHandler.newUser()
-    res.addCookie("sessionID", sessionID.toString())
+    res.addCookie("sessionID", sessionID)
 
     res
   }
 
+  def nameForm(
+      header: HashMap[String, String]
+  ): Response = {
+    val reqHeader = new RequestHeader(header)
+
+    var sessionID = ""
+    var formData  = FormData("", "", "")
+
+    getSessionIDAndFormData(reqHeader) match {
+      case (Some(_sessionID), Some(_formData)) => {
+        sessionID = _sessionID
+        formData = _formData
+      }
+      case (_, _) => sessionIDNotFound()
+    }
+
+    val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
+    elements.append(new TextElement("名前:", false))
+    elements.append(
+      new InputElement("text", "name", formData.name)
+    )
+    elements.append(new TextElement("", true))
+    elements.append(new InputElement("submit", "", "next"))
+
+    val resBody = new ResponseBody(
+      Array[Element](new FormElement("/form/gender", "post", elements.toArray))
+    )
+
+    Ok(resBody.toString())
+  }
+
+  def sessionIDNotFound(): Response = {
+    val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
+    elements.append(new TextElement("セッションIDが確認できませんでした", true))
+    elements.append(new TextElement("初めから回答しなおしてください", true))
+    elements.append(new InputElement("submit", "", "back to start"))
+    val resBody = new ResponseBody(
+      Array[Element](new FormElement("/", "get", elements.toArray))
+    )
+
+    BadRequest(resBody.toString())
+  }
+
+  def getSessionIDAndFormData(
+      reqHeader: RequestHeader
+  ): (Option[String], Option[FormData]) = {
+    reqHeader.getFromCookie("sessionID") match {
+      case Some(sessionID) => {
+        SessionServerHandler.getFormData(sessionID) match {
+          case Some(formData) => {
+            (Some(sessionID), Some(formData))
+          }
+          case None => (Some(sessionID), None)
+        }
+      }
+      case None => (None, None)
+    }
+  }
 }
 
 case class FormData(

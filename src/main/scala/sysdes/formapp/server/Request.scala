@@ -81,6 +81,7 @@ class RequestHeader(header: HashMap[String, String]) {
               val value = URLDecoder.decode(p(1))
               pairsMap.put(key, value)
             }
+            case _ => ()
           }
         }
       }
