@@ -34,14 +34,15 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
 
   def handle(request: Request): Response =
     request match {
-      case Request("GET", "/", _, _, _)                => index()
-      case Request("POST", "/form/name", _, header, _) => nameForm(header)
+      case Request("GET", "/", _, _, _) => index()
+      case Request("POST", "/form/name", _, header, body) =>
+        middleware(header, body, nameForm)
       case Request("POST", "/form/gender", _, header, body) =>
-        genderForm(header, body)
+        middleware(header, body, genderForm)
       case Request("POST", "/form/message", _, header, body) =>
-        messageForm(header, body)
+        middleware(header, body, messageForm)
       case Request("POST", "/form/confirm", _, header, body) =>
-        confirm(header, body)
+        middleware(header, body, confirm)
       case Request("POST", "/form/finish", _, _, _) =>
         finish()
       case _ =>
@@ -66,21 +67,10 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
   }
 
   def nameForm(
-      header: HashMap[String, String]
+      sessionID: String,
+      formData: FormData,
+      params: HashMap[String, String]
   ): Response = {
-    val reqHeader = new RequestHeader(header)
-
-    var sessionID = ""
-    var formData  = FormData("", "", "")
-
-    getSessionIDAndFormData(reqHeader) match {
-      case (Some(_sessionID), Some(_formData)) => {
-        sessionID = _sessionID
-        formData = _formData
-      }
-      case (_, _) => return sessionIDNotFound()
-    }
-
     val elements: ArrayBuffer[Element] = new ArrayBuffer[Element]()
     elements.append(new TextElement("名前:", false))
     elements.append(
@@ -97,24 +87,10 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
   }
 
   def genderForm(
-      header: HashMap[String, String],
-      body: Option[String]
+      sessionID: String,
+      formData: FormData,
+      params: HashMap[String, String]
   ): Response = {
-    val reqHeader            = new RequestHeader(header)
-    val reqBody: RequestBody = new RequestBody(body)
-    val params               = reqBody.parseParams()
-
-    var sessionID = ""
-    var formData  = FormData("", "", "")
-
-    getSessionIDAndFormData(reqHeader) match {
-      case (Some(_sessionID), Some(_formData)) => {
-        sessionID = _sessionID
-        formData = _formData
-      }
-      case (_, _) => return sessionIDNotFound()
-    }
-
     val name = params.getOrElse("name", "")
     if (name != "") {
       formData.name = name
@@ -146,24 +122,10 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
   }
 
   def messageForm(
-      header: HashMap[String, String],
-      body: Option[String]
+      sessionID: String,
+      formData: FormData,
+      params: HashMap[String, String]
   ): Response = {
-    val reqHeader            = new RequestHeader(header)
-    val reqBody: RequestBody = new RequestBody(body)
-    val params               = reqBody.parseParams()
-
-    var sessionID = ""
-    var formData  = FormData("", "", "")
-
-    getSessionIDAndFormData(reqHeader) match {
-      case (Some(_sessionID), Some(_formData)) => {
-        sessionID = _sessionID
-        formData = _formData
-      }
-      case (_, _) => return sessionIDNotFound()
-    }
-
     val gender = params.getOrElse("gender", "")
     if (gender != "") {
       formData.gender = gender
@@ -193,24 +155,10 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
   }
 
   def confirm(
-      header: HashMap[String, String],
-      body: Option[String]
+      sessionID: String,
+      formData: FormData,
+      params: HashMap[String, String]
   ): Response = {
-    val reqHeader            = new RequestHeader(header)
-    val reqBody: RequestBody = new RequestBody(body)
-    val params               = reqBody.parseParams()
-
-    var sessionID = ""
-    var formData  = FormData("", "", "")
-
-    getSessionIDAndFormData(reqHeader) match {
-      case (Some(_sessionID), Some(_formData)) => {
-        sessionID = _sessionID
-        formData = _formData
-      }
-      case (_, _) => return sessionIDNotFound()
-    }
-
     val message = params.getOrElse("message", "")
     if (message != "") {
       formData.message = message
@@ -274,6 +222,23 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
         }
       }
       case None => (None, None)
+    }
+  }
+
+  def middleware(
+      header: HashMap[String, String],
+      body: Option[String],
+      mainFunc: (String, FormData, HashMap[String, String]) => Response
+  ): Response = {
+    val reqHeader            = new RequestHeader(header)
+    val reqBody: RequestBody = new RequestBody(body)
+    val params               = reqBody.parseParams()
+
+    getSessionIDAndFormData(reqHeader) match {
+      case (Some(sessionID), Some(formData)) => {
+        mainFunc(sessionID, formData, reqBody.parseParams())
+      }
+      case (_, _) => sessionIDNotFound()
     }
   }
 }
