@@ -34,7 +34,8 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
 
   def handle(request: Request): Response =
     request match {
-      case Request("GET", "/", _, _, _) => index()
+      case Request("GET", "/", _, _, _)  => index()
+      case Request("POST", "/", _, _, _) => index()
       case Request("POST", "/form/name", _, header, body) =>
         middleware(header, body, nameForm)
       case Request("POST", "/form/gender", _, header, body) =>
@@ -80,7 +81,14 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
     elements.append(new InputElement("submit", "", "next"))
 
     val resBody = new ResponseBody(
-      Array[Element](new FormElement("/form/gender", "post", elements.toArray))
+      Array[Element](
+        new FormElement("/form/gender", "post", elements.toArray),
+        new FormElement(
+          "/",
+          "post",
+          Array[Element](new InputElement("submit", "", "back"))
+        )
+      )
     )
 
     Ok(resBody.toString())

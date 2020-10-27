@@ -16,6 +16,7 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
   override def handle(request: Request): Response =
     request match {
       case Request("GET", "/", _, _, _)                 => index()
+      case Request("POST", "/", _, _, _)                => index()
       case Request("POST", "/form/name", _, _, body)    => nameForm(body)
       case Request("POST", "/form/gender", _, _, body)  => genderForm(body)
       case Request("POST", "/form/message", _, _, body) => messageForm(body)
@@ -55,7 +56,14 @@ class StatelessServerHandler(socket: Socket) extends Handler(socket) {
     }
 
     val resBody = new ResponseBody(
-      Array[Element](new FormElement("/form/gender", "post", elements.toArray))
+      Array[Element](
+        new FormElement("/form/gender", "post", elements.toArray),
+        new FormElement(
+          "/",
+          "post",
+          Array[Element](new InputElement("submit", "", "back"))
+        )
+      )
     )
     Ok(resBody.toString())
   }
