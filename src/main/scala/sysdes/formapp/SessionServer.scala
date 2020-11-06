@@ -244,7 +244,7 @@ class SessionServerHandler(socket: Socket) extends Handler(socket) {
 
     getSessionIDAndFormData(reqHeader) match {
       case (Some(sessionID), Some(formData)) => {
-        mainFunc(sessionID, formData, reqBody.parseParams())
+        mainFunc(sessionID, formData, params)
       }
       case (_, _) => sessionIDNotFound()
     }
